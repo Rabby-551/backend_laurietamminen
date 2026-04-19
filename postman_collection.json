@@ -1,17 +1,29 @@
 {
   "info": {
-    "name": "Steps Journey API",
-    "_postman_id": "f844d0c5-9364-4eb8-a60e-c78a5b87f4ad",
-    "description": "Postman collection for the Steps Journey backend",
+    "_postman_id": "8f7f03de-bcf2-4e8d-b215-5b28476fa1a4",
+    "name": "Steps Journey Backend API",
+    "description": "Complete Postman Collection v2.1 for the Steps Journey backend.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
-      "key": "baseUrl",
-      "value": "http://localhost:5000/api"
+      "key": "base_url",
+      "value": "http://localhost:3000"
     },
     {
-      "key": "accessToken",
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "alert_id",
+      "value": ""
+    },
+    {
+      "key": "user_id",
       "value": ""
     }
   ],
@@ -29,10 +41,20 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/auth/register",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"full_name\": \"Demo User\",\n  \"phone_number\": \"+8801700000000\",\n  \"email\": \"demo@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}"
+              "raw": "{\n  \"full_name\": \"Demo User\",\n  \"phone_number\": \"+8801700000000\",\n  \"email\": \"demo@example.com\",\n  \"password\": \"Password123!\",\n  \"confirm_password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -46,10 +68,20 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/auth/login",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
           }
         },
@@ -63,10 +95,20 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/auth/forgot-password",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"demo@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
             }
           }
         },
@@ -80,10 +122,20 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/auth/verify-otp",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"demo@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/verify-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "verify-otp"
+              ]
             }
           }
         },
@@ -97,10 +149,20 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/auth/reset-password",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"demo@example.com\",\n  \"new_password\": \"newPassword123\",\n  \"confirm_password\": \"newPassword123\"\n}"
+              "raw": "{\n  \"email\": \"demo@example.com\",\n  \"new_password\": \"NewPassword123!\",\n  \"confirm_password\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
             }
           }
         },
@@ -114,10 +176,20 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/auth/refresh-token",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"refresh_token\": \"\"\n}"
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh-token"
+              ]
             }
           }
         },
@@ -128,16 +200,26 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{baseUrl}}/auth/logout"
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
           }
         }
       ]
     },
     {
-      "name": "Users",
+      "name": "User Profile",
       "item": [
         {
           "name": "Get Profile",
@@ -146,10 +228,20 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{baseUrl}}/users/profile"
+            "url": {
+              "raw": "{{base_url}}/api/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "profile"
+              ]
+            }
           }
         },
         {
@@ -159,10 +251,9 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{baseUrl}}/users/profile",
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -172,10 +263,56 @@
                   "type": "text"
                 },
                 {
+                  "key": "email",
+                  "value": "updated.demo@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "date_of_birth",
+                  "value": "1995-05-21",
+                  "type": "text"
+                },
+                {
                   "key": "height",
                   "value": "175",
                   "type": "text"
+                },
+                {
+                  "key": "weight",
+                  "value": "70",
+                  "type": "text"
+                },
+                {
+                  "key": "height_unit",
+                  "value": "cm",
+                  "type": "text"
+                },
+                {
+                  "key": "weight_unit",
+                  "value": "kg",
+                  "type": "text"
+                },
+                {
+                  "key": "location_permission",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "profile_picture",
+                  "type": "file",
+                  "src": ""
                 }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "profile"
               ]
             }
           }
@@ -187,17 +324,27 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/users/step-goal",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"step_goal\": 12000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/step-goal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "step-goal"
+              ]
             }
           }
         },
@@ -208,17 +355,27 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/users/change-password",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"current_password\": \"password123\",\n  \"new_password\": \"newPassword123\",\n  \"confirm_password\": \"newPassword123\"\n}"
+              "raw": "{\n  \"current_password\": \"Password123!\",\n  \"new_password\": \"NewPassword123!\",\n  \"confirm_password\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "change-password"
+              ]
             }
           }
         }
@@ -228,50 +385,111 @@
       "name": "Steps",
       "item": [
         {
-          "name": "Confirm Steps",
+          "name": "Confirm Step",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/steps/confirm",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"steps\": 6500\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/steps/confirm",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "steps",
+                "confirm"
+              ]
             }
           }
         },
         {
-          "name": "Get Today Steps",
+          "name": "Confirm Secret Trigger",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/steps/today"
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"steps\": \"1234!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/steps/confirm",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "steps",
+                "confirm"
+              ]
+            }
           }
         },
         {
-          "name": "Get Weekly Steps",
+          "name": "Today Steps",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{baseUrl}}/steps/weekly"
+            "url": {
+              "raw": "{{base_url}}/api/steps/today",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "steps",
+                "today"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Weekly Steps",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/steps/weekly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "steps",
+                "weekly"
+              ]
+            }
           }
         }
       ]
@@ -280,43 +498,61 @@
       "name": "Activities",
       "item": [
         {
-          "name": "Create Activity",
+          "name": "Add Activity",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/activities",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"category\": \"walking\",\n  \"notes\": \"Evening walk\",\n  \"entry_time\": \"2026-04-19T18:30:00.000Z\",\n  \"steps\": 7200\n}"
+              "raw": "{\n  \"category\": \"walking\",\n  \"notes\": \"Morning walk in the park\",\n  \"entry_time\": \"2026-04-19T08:00:00.000Z\",\n  \"steps\": 7200\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "activities"
+              ]
             }
           }
         },
         {
-          "name": "Get Activities",
+          "name": "List Activities",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{baseUrl}}/activities"
+            "url": {
+              "raw": "{{base_url}}/api/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "activities"
+              ]
+            }
           }
         }
       ]
     },
     {
-      "name": "Alerts",
+      "name": "Alerts / SOS",
       "item": [
         {
           "name": "Trigger Alert",
@@ -325,38 +561,125 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/alerts/trigger",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"date_of_birth\": \"1995-05-21\",\n  \"lat\": 23.8103,\n  \"lng\": 90.4125,\n  \"accuracy\": 12,\n  \"street_address\": \"Dhaka Test Address\",\n  \"signal_strength\": \"strong\",\n  \"connection_state\": \"4g\",\n  \"device_id\": \"device-001\"\n}"
+              "raw": "{\n  \"date_of_birth\": \"1995-05-21\",\n  \"lat\": 23.8103,\n  \"lng\": 90.4125,\n  \"accuracy\": 12,\n  \"street_address\": \"123 Demo Street, Dhaka\",\n  \"signal_strength\": \"strong\",\n  \"connection_state\": \"4g\",\n  \"device_id\": \"device-001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/alerts/trigger",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "trigger"
+              ]
             }
           }
         },
         {
-          "name": "Update Alert Location",
+          "name": "Location Update",
           "request": {
             "method": "PATCH",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/alerts/:alertId/location-update",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"lat\": 23.8111,\n  \"lng\": 90.4131,\n  \"accuracy\": 8,\n  \"street_address\": \"Updated Address\",\n  \"signal_strength\": \"medium\",\n  \"connection_state\": \"wifi\",\n  \"device_id\": \"device-001\"\n}"
+              "raw": "{\n  \"lat\": 23.8111,\n  \"lng\": 90.4131,\n  \"accuracy\": 8,\n  \"street_address\": \"Updated Demo Street, Dhaka\",\n  \"signal_strength\": \"medium\",\n  \"connection_state\": \"wifi\",\n  \"device_id\": \"device-001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/alerts/{{alert_id}}/location-update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "{{alert_id}}",
+                "location-update"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Alerts",
+      "item": [
+        {
+          "name": "List Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/alerts?filter=all&page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "all"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Alert Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/alerts/{{alert_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "alerts",
+                "{{alert_id}}"
+              ]
             }
           }
         },
@@ -367,17 +690,88 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/alerts/:alertId/status",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"in_progress\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/alerts/{{alert_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "alerts",
+                "{{alert_id}}",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users?filter=all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "all"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Active",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{user_id}}/toggle-active",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "{{user_id}}",
+                "toggle-active"
+              ]
             }
           }
         }
