@@ -1,6 +1,8 @@
 import httpStatus from 'http-status';
+import { randomUUID } from 'node:crypto';
 import DailyStep from '../models/DailyStep.js';
 import DailyStreak from '../models/DailyStreak.js';
+import TriggerToken from '../models/trigger_token.model.js';
 import catchAsync from '../utils/catchAsync.js';
 import sendResponse from '../utils/sendResponse.js';
 import { formatUtcDate, getRecentUtcDates, startOfUtcDay } from '../utils/date.js';
@@ -10,13 +12,18 @@ export const confirmSteps = catchAsync(async (req, res) => {
   const parsed = parseStepInput(req.body.steps);
 
   if (parsed.trigger) {
-    return sendResponse(res, {
-      statusCode: httpStatus.OK,
-      message: 'Secret trigger detected',
-      data: {
-        trigger: true,
-        next: 'confirm_dob',
-      },
+    const token = randomUUID();
+
+    await TriggerToken.create({
+      user_id: req.user._id,
+      token,
+      expires_at: new Date(Date.now() + 5 * 60 * 1000),
+      is_used: false,
+    });
+
+    return res.status(httpStatus.OK).json({
+      trigger: true,
+      trigger_token: token,
     });
   }
 

@@ -1,9 +1,9 @@
 import httpStatus from 'http-status';
 import Alert from '../models/Alert.js';
+import TriggerToken from '../models/trigger_token.model.js';
 import AppError from '../errors/AppError.js';
 import catchAsync from '../utils/catchAsync.js';
 import sendResponse from '../utils/sendResponse.js';
-import { compareDateOnly } from '../utils/date.js';
 import {
   emitAlertLocationUpdate,
   emitAlertStatusChanged,
@@ -56,7 +56,7 @@ const serializeAlertPayload = (alert, user) => ({
 
 export const triggerAlert = catchAsync(async (req, res) => {
   const {
-    date_of_birth,
+    trigger_token,
     lat,
     lng,
     accuracy,
@@ -66,17 +66,21 @@ export const triggerAlert = catchAsync(async (req, res) => {
     device_id,
   } = req.body;
 
-  if (!req.user.date_of_birth) {
-    throw new AppError('Date of birth is not set for this account', httpStatus.BAD_REQUEST);
+  const triggerToken = await TriggerToken.findOne({
+    token: trigger_token,
+    user_id: req.user._id,
+    expires_at: { $gt: new Date() },
+    is_used: false,
+  });
+
+  if (!triggerToken) {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: 'Invalid request',
+    });
   }
 
-  if (!date_of_birth) {
-    throw new AppError('Date of birth is required', httpStatus.BAD_REQUEST);
-  }
-
-  if (!compareDateOnly(req.user.date_of_birth, date_of_birth)) {
-    throw new AppError('Date of birth does not match', httpStatus.BAD_REQUEST);
-  }
+  triggerToken.is_used = true;
+  await triggerToken.save({ validateBeforeSave: false });
 
   const alert = await Alert.create({
     client_id: req.user._id,
@@ -92,10 +96,8 @@ export const triggerAlert = catchAsync(async (req, res) => {
   const payload = serializeAlertPayload(alert, req.user);
   emitNewAlert(payload);
 
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    message: 'Alert triggered successfully',
-    data: payload,
+  return res.status(httpStatus.CREATED).json({
+    success: true,
   });
 });
 
