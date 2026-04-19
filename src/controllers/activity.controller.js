@@ -1,21 +1,27 @@
-import httpStatus from 'http-status';
-import Activity from '../models/Activity.js';
-import AppError from '../errors/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
-import sendResponse from '../utils/sendResponse.js';
-import { parseStepInput, syncDailyStepAndStreak } from '../utils/stepTracking.js';
+import httpStatus from "http-status";
+import Activity from "../models/Activity.js";
+import AppError from "../errors/AppError.js";
+import catchAsync from "../utils/catchAsync.js";
+import sendResponse from "../utils/sendResponse.js";
+import {
+  parseStepInput,
+  syncDailyStepAndStreak,
+} from "../utils/stepTracking.js";
 
 export const createActivity = catchAsync(async (req, res) => {
   const { category, notes, entry_time, steps } = req.body;
 
   if (!category) {
-    throw new AppError('Category is required', httpStatus.BAD_REQUEST);
+    throw new AppError("Category is required", httpStatus.BAD_REQUEST);
   }
 
   const parsed = parseStepInput(steps);
 
   if (parsed.trigger) {
-    throw new AppError('Secret trigger is only supported on step confirmation', httpStatus.BAD_REQUEST);
+    throw new AppError(
+      "Secret trigger is only supported on step confirmation",
+      httpStatus.BAD_REQUEST,
+    );
   }
 
   const { dailyStep, streak } = await syncDailyStepAndStreak({
@@ -34,7 +40,7 @@ export const createActivity = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
-    message: 'Activity created successfully',
+    message: "Activity created successfully",
     data: {
       activity,
       step: dailyStep,
@@ -45,12 +51,12 @@ export const createActivity = catchAsync(async (req, res) => {
 
 export const getActivities = catchAsync(async (req, res) => {
   const activities = await Activity.find({ user_id: req.user._id })
-    .populate('daily_step_id')
+    .populate("daily_step_id")
     .sort({ entry_time: -1, created_at: -1 });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: 'Activities retrieved successfully',
+    message: "Activities retrieved successfully",
     data: activities,
   });
 });
