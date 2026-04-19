@@ -23,6 +23,10 @@
       "value": ""
     },
     {
+      "key": "trigger_token",
+      "value": ""
+    },
+    {
       "key": "user_id",
       "value": ""
     }
@@ -416,7 +420,7 @@
           }
         },
         {
-          "name": "Confirm Secret Trigger",
+          "name": "Generate Trigger Token",
           "request": {
             "method": "POST",
             "header": [
@@ -570,7 +574,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"date_of_birth\": \"1995-05-21\",\n  \"lat\": 23.8103,\n  \"lng\": 90.4125,\n  \"accuracy\": 12,\n  \"street_address\": \"123 Demo Street, Dhaka\",\n  \"signal_strength\": \"strong\",\n  \"connection_state\": \"4g\",\n  \"device_id\": \"device-001\"\n}"
+              "raw": "{\n  \"trigger_token\": \"{{trigger_token}}\",\n  \"lat\": 23.8103,\n  \"lng\": 90.4125,\n  \"accuracy\": 12,\n  \"street_address\": \"123 Demo Street, Dhaka\",\n  \"signal_strength\": \"strong\",\n  \"connection_state\": \"4g\",\n  \"device_id\": \"device-001\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/alerts/trigger",
