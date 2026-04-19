@@ -28,4 +28,14 @@ export const protect = catchAsync(async (req, res, next) => {
   next();
 });
 
+export const restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return next(new AppError('You are not allowed to access this resource', httpStatus.FORBIDDEN));
+    }
+
+    return next();
+  };
+
 export default protect;

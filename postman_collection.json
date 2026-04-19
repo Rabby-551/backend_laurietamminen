@@ -223,6 +223,165 @@
           }
         }
       ]
+    },
+    {
+      "name": "Steps",
+      "item": [
+        {
+          "name": "Confirm Steps",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/steps/confirm",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"steps\": 6500\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Today Steps",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/steps/today"
+          }
+        },
+        {
+          "name": "Get Weekly Steps",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/steps/weekly"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "Create Activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/activities",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"walking\",\n  \"notes\": \"Evening walk\",\n  \"entry_time\": \"2026-04-19T18:30:00.000Z\",\n  \"steps\": 7200\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Activities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/activities"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "Trigger Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/alerts/trigger",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date_of_birth\": \"1995-05-21\",\n  \"lat\": 23.8103,\n  \"lng\": 90.4125,\n  \"accuracy\": 12,\n  \"street_address\": \"Dhaka Test Address\",\n  \"signal_strength\": \"strong\",\n  \"connection_state\": \"4g\",\n  \"device_id\": \"device-001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Alert Location",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/alerts/:alertId/location-update",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": 23.8111,\n  \"lng\": 90.4131,\n  \"accuracy\": 8,\n  \"street_address\": \"Updated Address\",\n  \"signal_strength\": \"medium\",\n  \"connection_state\": \"wifi\",\n  \"device_id\": \"device-001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Alert Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/alerts/:alertId/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}"
+            }
+          }
+        }
+      ]
     }
   ]
 }
