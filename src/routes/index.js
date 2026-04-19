@@ -5,6 +5,7 @@ import userRoutes from './user.routes.js';
 import stepsRoutes from './steps.routes.js';
 import activityRoutes from './activity.routes.js';
 import alertRoutes from './alert.routes.js';
+import adminRoutes from './admin.routes.js';
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use('/users', userRoutes);
 router.use('/steps', stepsRoutes);
 router.use('/activities', activityRoutes);
 router.use('/alerts', alertRoutes);
+router.use('/admin', adminRoutes);
 
 export default router;

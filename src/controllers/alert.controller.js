@@ -157,8 +157,8 @@ export const updateAlertLocation = catchAsync(async (req, res) => {
 export const updateAlertStatus = catchAsync(async (req, res) => {
   const { status } = req.body;
 
-  if (!status) {
-    throw new AppError('Status is required', httpStatus.BAD_REQUEST);
+  if (!['in_progress', 'resolved'].includes(status)) {
+    throw new AppError('Status must be either in_progress or resolved', httpStatus.BAD_REQUEST);
   }
 
   const alert = await Alert.findByIdAndUpdate(
