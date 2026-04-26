@@ -96,7 +96,12 @@ export const emitAlertLocationUpdate = (payload) => {
 export const emitAlertStatusChanged = (payload) => {
   const socket = getIO();
   socket.to(ADMIN_ROOM).emit('alert_status_changed', payload);
-  socket.to(getClientRoom(payload.client_id.toString())).emit('alert_status_changed', payload);
+
+  if (payload.client_user_id) {
+    socket
+      .to(getClientRoom(payload.client_user_id.toString()))
+      .emit('alert_status_changed', payload);
+  }
 };
 
 export default initSocket;

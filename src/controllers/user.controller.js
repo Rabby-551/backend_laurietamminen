@@ -6,6 +6,7 @@ import catchAsync from '../utils/catchAsync.js';
 import sendResponse from '../utils/sendResponse.js';
 import pick from '../utils/pick.js';
 import { getRefreshCookieClearOptions } from '../utils/token.js';
+import { generateClientId } from '../utils/admin.js';
 
 const parseBoolean = (value) => {
   if (typeof value === 'boolean') {
@@ -77,6 +78,24 @@ export const updateProfile = catchAsync(async (req, res) => {
 
     if (emailOwner && emailOwner._id.toString() !== req.user._id.toString()) {
       throw new AppError('Email already exists', httpStatus.CONFLICT);
+    }
+  }
+
+  if (allowedFields.date_of_birth) {
+    const parsedDateOfBirth = new Date(allowedFields.date_of_birth);
+
+    if (Number.isNaN(parsedDateOfBirth.getTime())) {
+      throw new AppError('Date of birth must be a valid date', httpStatus.BAD_REQUEST);
+    }
+
+    const currentDateOfBirth = req.user.date_of_birth
+      ? new Date(req.user.date_of_birth)
+      : null;
+    const hasDateOfBirthChanged =
+      !currentDateOfBirth || currentDateOfBirth.getTime() !== parsedDateOfBirth.getTime();
+
+    if (!req.user.client_id || hasDateOfBirthChanged) {
+      allowedFields.client_id = await generateClientId(parsedDateOfBirth, req.user._id);
     }
   }
 

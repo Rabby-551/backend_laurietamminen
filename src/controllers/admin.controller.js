@@ -25,7 +25,8 @@ const parsePagination = (query) => {
 
 const buildAlertListItem = (alert) => ({
   alert_id: alert._id,
-  client_id: alert.client_id?._id,
+  client_id: alert.client_id?.client_id || null,
+  client_user_id: alert.client_id?._id,
   full_name: alert.client_id?.full_name || "",
   phone_number: alert.client_id?.phone_number || "",
   coordinates: alert.coordinates,
@@ -37,7 +38,8 @@ const buildAlertListItem = (alert) => ({
 
 const buildAlertStatusPayload = (alert) => ({
   alert_id: alert._id,
-  client_id: alert.client_id?._id || alert.client_id,
+  client_id: alert.client_id?.client_id || null,
+  client_user_id: alert.client_id?._id || alert.client_id,
   full_name: alert.client_id?.full_name || "",
   coordinates: alert.coordinates,
   accuracy: alert.accuracy,
@@ -65,7 +67,7 @@ export const getAdminAlerts = catchAsync(async (req, res) => {
     Alert.find(query)
       .populate(
         "client_id",
-        "full_name phone_number email profile_picture_url profile_picture_public_id",
+        "full_name phone_number email profile_picture_url profile_picture_public_id client_id",
       )
       .sort({ created_at: -1 })
       .skip(skip)
@@ -90,7 +92,7 @@ export const getAdminAlerts = catchAsync(async (req, res) => {
 export const getAdminAlertDetail = catchAsync(async (req, res) => {
   const alert = await Alert.findById(req.params.id).populate(
     "client_id",
-    "full_name phone_number role created_at",
+    "full_name phone_number role created_at client_id",
   );
 
   if (!alert) {
@@ -149,7 +151,7 @@ export const updateAdminAlertStatus = catchAsync(async (req, res) => {
       new: true,
       runValidators: true,
     },
-  ).populate("client_id", "full_name");
+  ).populate("client_id", "full_name client_id");
 
   if (!alert) {
     throw new AppError("Alert not found", httpStatus.NOT_FOUND);

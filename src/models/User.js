@@ -47,6 +47,13 @@ const userSchema = new mongoose.Schema(
     date_of_birth: {
       type: Date,
     },
+    client_id: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+      default: null,
+    },
     height: {
       type: Number,
       min: [0, 'Height cannot be negative'],

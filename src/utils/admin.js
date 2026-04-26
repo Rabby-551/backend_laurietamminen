@@ -1,6 +1,5 @@
 import { Buffer } from 'node:buffer';
 import User from '../models/User.js';
-import { startOfUtcDay, addUtcDays } from './date.js';
 
 const padSequence = (value) => String(value).padStart(2, '0');
 
@@ -13,34 +12,35 @@ export const formatClientDateSegment = (value) => {
   return `${year}${month}${day}`;
 };
 
-export const getFormattedClientId = async (user) => {
-  const createdAt = new Date(user.created_at || user.createdAt || Date.now());
-  const dayStart = startOfUtcDay(createdAt);
-  const nextDay = addUtcDays(dayStart, 1);
+export const generateClientId = async (dateOfBirth, excludeUserId = null) => {
+  const dateSegment = formatClientDateSegment(dateOfBirth);
+  const prefix = `Client-${dateSegment}-`;
 
-  const sequence = await User.countDocuments({
-    role: 'client',
-    created_at: {
-      $gte: dayStart,
-      $lt: nextDay,
+  const query = {
+    client_id: {
+      $regex: `^${prefix}`,
     },
-    $or: [
-      {
-        created_at: {
-          $lt: createdAt,
-        },
-      },
-      {
-        created_at: createdAt,
-        _id: {
-          $lte: user._id,
-        },
-      },
-    ],
-  });
+  };
 
-  return `Client-${formatClientDateSegment(createdAt)}-${padSequence(sequence || 1)}`;
+  if (excludeUserId) {
+    query._id = { $ne: excludeUserId };
+  }
+
+  const users = await User.find(query).select('client_id');
+  const highestSequence = users.reduce((maxSequence, user) => {
+    const serial = Number(String(user.client_id).replace(prefix, ''));
+
+    if (Number.isNaN(serial)) {
+      return maxSequence;
+    }
+
+    return Math.max(maxSequence, serial);
+  }, 0);
+
+  return `${prefix}${padSequence(highestSequence + 1)}`;
 };
+
+export const getFormattedClientId = async (user) => user?.client_id || null;
 
 export const encryptConnectionState = (value) => {
   if (!value) {

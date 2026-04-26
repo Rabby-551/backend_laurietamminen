@@ -46,7 +46,8 @@ const parseOptionalAccuracy = (accuracy) => {
 
 const serializeAlertPayload = (alert, user) => ({
   alert_id: alert._id,
-  client_id: user?._id || alert.client_id,
+  client_id: user?.client_id || alert.client_id?.client_id || null,
+  client_user_id: user?._id || alert.client_id?._id || alert.client_id,
   full_name: user?.full_name,
   coordinates: alert.coordinates,
   accuracy: alert.accuracy,
@@ -210,7 +211,7 @@ export const updateAlertStatus = catchAsync(async (req, res) => {
       new: true,
       runValidators: true,
     },
-  ).populate("client_id", "full_name");
+  ).populate("client_id", "full_name client_id");
 
   if (!alert) {
     throw new AppError("Alert not found", httpStatus.NOT_FOUND);
