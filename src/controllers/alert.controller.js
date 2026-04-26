@@ -1,21 +1,24 @@
-import httpStatus from 'http-status';
-import Alert from '../models/Alert.js';
-import TriggerToken from '../models/trigger_token.model.js';
-import AppError from '../errors/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
-import sendResponse from '../utils/sendResponse.js';
+import httpStatus from "http-status";
+import Alert from "../models/Alert.js";
+import TriggerToken from "../models/trigger_token.model.js";
+import AppError from "../errors/AppError.js";
+import catchAsync from "../utils/catchAsync.js";
+import sendResponse from "../utils/sendResponse.js";
 import {
   emitAlertLocationUpdate,
   emitAlertStatusChanged,
   emitNewAlert,
-} from '../sockets/index.js';
+} from "../sockets/index.js";
 
 const parseCoordinates = ({ lat, lng }) => {
   const parsedLat = Number(lat);
   const parsedLng = Number(lng);
 
   if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) {
-    throw new AppError('Latitude and longitude must be valid numbers', httpStatus.BAD_REQUEST);
+    throw new AppError(
+      "Latitude and longitude must be valid numbers",
+      httpStatus.BAD_REQUEST,
+    );
   }
 
   return {
@@ -25,14 +28,17 @@ const parseCoordinates = ({ lat, lng }) => {
 };
 
 const parseOptionalAccuracy = (accuracy) => {
-  if (accuracy === undefined || accuracy === null || accuracy === '') {
+  if (accuracy === undefined || accuracy === null || accuracy === "") {
     return null;
   }
 
   const parsedAccuracy = Number(accuracy);
 
   if (!Number.isFinite(parsedAccuracy) || parsedAccuracy < 0) {
-    throw new AppError('Accuracy must be a valid non-negative number', httpStatus.BAD_REQUEST);
+    throw new AppError(
+      "Accuracy must be a valid non-negative number",
+      httpStatus.BAD_REQUEST,
+    );
   }
 
   return parsedAccuracy;
@@ -54,9 +60,21 @@ const serializeAlertPayload = (alert, user) => ({
   updated_at: alert.updated_at,
 });
 
+const compareDateOnly = (date1, date2) => {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+
+  return (
+    d1.getUTCFullYear() === d2.getUTCFullYear() &&
+    d1.getUTCMonth() === d2.getUTCMonth() &&
+    d1.getUTCDate() === d2.getUTCDate()
+  );
+};
+
 export const triggerAlert = catchAsync(async (req, res) => {
   const {
     trigger_token,
+    date_of_birth,
     lat,
     lng,
     accuracy,
@@ -65,6 +83,21 @@ export const triggerAlert = catchAsync(async (req, res) => {
     connection_state,
     device_id,
   } = req.body;
+
+  if (!req.user.date_of_birth) {
+    throw new AppError(
+      "Date of birth is not set for this account",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  if (!date_of_birth) {
+    throw new AppError("Date of birth is required", httpStatus.BAD_REQUEST);
+  }
+
+  if (!compareDateOnly(req.user.date_of_birth, date_of_birth)) {
+    throw new AppError("Date of birth does not match", httpStatus.BAD_REQUEST);
+  }
 
   const triggerToken = await TriggerToken.findOne({
     token: trigger_token,
@@ -75,7 +108,7 @@ export const triggerAlert = catchAsync(async (req, res) => {
 
   if (!triggerToken) {
     return res.status(httpStatus.BAD_REQUEST).json({
-      message: 'Invalid request',
+      message: "Invalid request",
     });
   }
 
@@ -90,6 +123,7 @@ export const triggerAlert = catchAsync(async (req, res) => {
     signal_strength,
     connection_state,
     device_id,
+    dob: date_of_birth,
     last_sync_at: new Date(),
   });
 
@@ -97,7 +131,7 @@ export const triggerAlert = catchAsync(async (req, res) => {
   emitNewAlert(payload);
 
   return res.status(httpStatus.CREATED).json({
-    success: true,
+    data: payload,
   });
 });
 
@@ -143,7 +177,7 @@ export const updateAlertLocation = catchAsync(async (req, res) => {
   );
 
   if (!alert) {
-    throw new AppError('Alert not found', httpStatus.NOT_FOUND);
+    throw new AppError("Alert not found", httpStatus.NOT_FOUND);
   }
 
   const payload = serializeAlertPayload(alert, req.user);
@@ -151,7 +185,7 @@ export const updateAlertLocation = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: 'Alert location updated successfully',
+    message: "Alert location updated successfully",
     data: payload,
   });
 });
@@ -159,8 +193,11 @@ export const updateAlertLocation = catchAsync(async (req, res) => {
 export const updateAlertStatus = catchAsync(async (req, res) => {
   const { status } = req.body;
 
-  if (!['in_progress', 'resolved'].includes(status)) {
-    throw new AppError('Status must be either in_progress or resolved', httpStatus.BAD_REQUEST);
+  if (!["in_progress", "resolved"].includes(status)) {
+    throw new AppError(
+      "Status must be either in_progress or resolved",
+      httpStatus.BAD_REQUEST,
+    );
   }
 
   const alert = await Alert.findByIdAndUpdate(
@@ -173,10 +210,10 @@ export const updateAlertStatus = catchAsync(async (req, res) => {
       new: true,
       runValidators: true,
     },
-  ).populate('client_id', 'full_name');
+  ).populate("client_id", "full_name");
 
   if (!alert) {
-    throw new AppError('Alert not found', httpStatus.NOT_FOUND);
+    throw new AppError("Alert not found", httpStatus.NOT_FOUND);
   }
 
   const payload = serializeAlertPayload(alert, alert.client_id);
@@ -184,7 +221,7 @@ export const updateAlertStatus = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: 'Alert status updated successfully',
+    message: "Alert status updated successfully",
     data: payload,
   });
 });

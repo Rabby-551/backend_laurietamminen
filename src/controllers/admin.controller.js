@@ -1,19 +1,19 @@
-import httpStatus from 'http-status';
-import Alert from '../models/Alert.js';
-import User from '../models/User.js';
-import AppError from '../errors/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
-import sendResponse from '../utils/sendResponse.js';
+import httpStatus from "http-status";
+import Alert from "../models/Alert.js";
+import User from "../models/User.js";
+import AppError from "../errors/AppError.js";
+import catchAsync from "../utils/catchAsync.js";
+import sendResponse from "../utils/sendResponse.js";
 import {
   encryptConnectionState,
   formatActiveDuration,
   getFormattedClientId,
-} from '../utils/admin.js';
-import { emitAlertStatusChanged } from '../sockets/index.js';
+} from "../utils/admin.js";
+import { emitAlertStatusChanged } from "../sockets/index.js";
 
-const ALERT_FILTERS = ['all', 'pending', 'in_progress', 'resolved'];
-const USER_FILTERS = ['all', 'user', 'client'];
-const STATUS_UPDATES = ['in_progress', 'resolved'];
+const ALERT_FILTERS = ["all", "pending", "in_progress", "resolved"];
+const USER_FILTERS = ["all", "user", "client"];
+const STATUS_UPDATES = ["in_progress", "resolved"];
 
 const parsePagination = (query) => {
   const page = Math.max(1, Number(query.page) || 1);
@@ -26,8 +26,8 @@ const parsePagination = (query) => {
 const buildAlertListItem = (alert) => ({
   alert_id: alert._id,
   client_id: alert.client_id?._id,
-  full_name: alert.client_id?.full_name || '',
-  phone_number: alert.client_id?.phone_number || '',
+  full_name: alert.client_id?.full_name || "",
+  phone_number: alert.client_id?.phone_number || "",
   coordinates: alert.coordinates,
   status: alert.status,
   street_address: alert.street_address,
@@ -38,7 +38,7 @@ const buildAlertListItem = (alert) => ({
 const buildAlertStatusPayload = (alert) => ({
   alert_id: alert._id,
   client_id: alert.client_id?._id || alert.client_id,
-  full_name: alert.client_id?.full_name || '',
+  full_name: alert.client_id?.full_name || "",
   coordinates: alert.coordinates,
   accuracy: alert.accuracy,
   street_address: alert.street_address,
@@ -52,18 +52,21 @@ const buildAlertStatusPayload = (alert) => ({
 });
 
 export const getAdminAlerts = catchAsync(async (req, res) => {
-  const filter = req.query.filter || 'all';
+  const filter = req.query.filter || "all";
 
   if (!ALERT_FILTERS.includes(filter)) {
-    throw new AppError('Invalid alert filter', httpStatus.BAD_REQUEST);
+    throw new AppError("Invalid alert filter", httpStatus.BAD_REQUEST);
   }
 
-  const query = filter === 'all' ? {} : { status: filter };
+  const query = filter === "all" ? {} : { status: filter };
   const { page, limit, skip } = parsePagination(req.query);
 
   const [alerts, total] = await Promise.all([
     Alert.find(query)
-      .populate('client_id', 'full_name phone_number')
+      .populate(
+        "client_id",
+        "full_name phone_number email profile_picture_url profile_picture_public_id",
+      )
       .sort({ created_at: -1 })
       .skip(skip)
       .limit(limit),
@@ -72,7 +75,7 @@ export const getAdminAlerts = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: 'Admin alerts retrieved successfully',
+    message: "Admin alerts retrieved successfully",
     meta: {
       page,
       limit,
@@ -86,12 +89,12 @@ export const getAdminAlerts = catchAsync(async (req, res) => {
 
 export const getAdminAlertDetail = catchAsync(async (req, res) => {
   const alert = await Alert.findById(req.params.id).populate(
-    'client_id',
-    'full_name phone_number role created_at',
+    "client_id",
+    "full_name phone_number role created_at",
   );
 
   if (!alert) {
-    throw new AppError('Alert not found', httpStatus.NOT_FOUND);
+    throw new AppError("Alert not found", httpStatus.NOT_FOUND);
   }
 
   const clientDisplayId = alert.client_id
@@ -100,13 +103,13 @@ export const getAdminAlertDetail = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: 'Admin alert detail retrieved successfully',
+    message: "Admin alert detail retrieved successfully",
     data: {
       alert_id: alert._id,
       client_id: clientDisplayId,
       client_user_id: alert.client_id?._id,
-      full_name: alert.client_id?.full_name || '',
-      phone_number: alert.client_id?.phone_number || '',
+      full_name: alert.client_id?.full_name || "",
+      phone_number: alert.client_id?.phone_number || "",
       coordinates: {
         lat: alert.coordinates?.lat,
         lng: alert.coordinates?.lng,
@@ -121,7 +124,7 @@ export const getAdminAlertDetail = catchAsync(async (req, res) => {
       status: alert.status,
       created_at: alert.created_at,
       updated_at: alert.updated_at,
-      operational_status_buttons: ['mark_in_progress', 'resolve'],
+      operational_status_buttons: ["mark_in_progress", "resolve"],
     },
   });
 });
@@ -130,7 +133,10 @@ export const updateAdminAlertStatus = catchAsync(async (req, res) => {
   const { status } = req.body;
 
   if (!STATUS_UPDATES.includes(status)) {
-    throw new AppError('Status must be either in_progress or resolved', httpStatus.BAD_REQUEST);
+    throw new AppError(
+      "Status must be either in_progress or resolved",
+      httpStatus.BAD_REQUEST,
+    );
   }
 
   const alert = await Alert.findByIdAndUpdate(
@@ -143,10 +149,10 @@ export const updateAdminAlertStatus = catchAsync(async (req, res) => {
       new: true,
       runValidators: true,
     },
-  ).populate('client_id', 'full_name');
+  ).populate("client_id", "full_name");
 
   if (!alert) {
-    throw new AppError('Alert not found', httpStatus.NOT_FOUND);
+    throw new AppError("Alert not found", httpStatus.NOT_FOUND);
   }
 
   const payload = buildAlertStatusPayload(alert);
@@ -154,26 +160,26 @@ export const updateAdminAlertStatus = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: 'Admin alert status updated successfully',
+    message: "Admin alert status updated successfully",
     data: payload,
   });
 });
 
 export const getAdminUsers = catchAsync(async (req, res) => {
-  const filter = req.query.filter || 'all';
+  const filter = req.query.filter || "all";
 
   if (!USER_FILTERS.includes(filter)) {
-    throw new AppError('Invalid user filter', httpStatus.BAD_REQUEST);
+    throw new AppError("Invalid user filter", httpStatus.BAD_REQUEST);
   }
 
-  const query = filter === 'all' ? {} : { role: filter };
+  const query = filter === "all" ? {} : { role: filter };
   const users = await User.find(query)
-    .select('full_name email phone_number role is_active created_at')
+    .select("full_name email phone_number role is_active created_at")
     .sort({ created_at: -1 });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: 'Admin users retrieved successfully',
+    message: "Admin users retrieved successfully",
     meta: {
       filter,
       total: users.length,
@@ -186,7 +192,7 @@ export const toggleAdminUserActive = catchAsync(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (!user) {
-    throw new AppError('User not found', httpStatus.NOT_FOUND);
+    throw new AppError("User not found", httpStatus.NOT_FOUND);
   }
 
   user.is_active = !user.is_active;
@@ -194,7 +200,7 @@ export const toggleAdminUserActive = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: `User ${user.is_active ? 'unblocked' : 'blocked'} successfully`,
+    message: `User ${user.is_active ? "unblocked" : "blocked"} successfully`,
     data: user,
   });
 });
