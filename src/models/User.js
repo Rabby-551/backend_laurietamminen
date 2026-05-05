@@ -1,81 +1,80 @@
-import bcrypt from 'bcryptjs';
-import mongoose from 'mongoose';
-import validator from 'validator';
+import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
+import validator from "validator";
 
 const userSchema = new mongoose.Schema(
   {
     full_name: {
       type: String,
-      required: [true, 'Full name is required'],
+      required: [true, "Full name is required"],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, "Email is required"],
       unique: true,
       lowercase: true,
       trim: true,
       validate: {
         validator: validator.isEmail,
-        message: 'Please provide a valid email address',
+        message: "Please provide a valid email address",
       },
     },
     phone_number: {
       type: String,
-      required: [true, 'Phone number is required'],
+      required: [true, "Phone number is required"],
       trim: true,
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 6 characters'],
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters"],
       select: false,
     },
     role: {
       type: String,
-      enum: ['user', 'client', 'admin'],
-      default: 'user',
+      enum: ["user", "client", "admin"],
+      default: "user",
     },
     profile_picture_url: {
       type: String,
-      default: '',
+      default: "",
     },
     profile_picture_public_id: {
       type: String,
-      default: '',
+      default: "",
     },
     date_of_birth: {
       type: Date,
     },
     client_id: {
       type: String,
-      unique: true,
       sparse: true,
       trim: true,
       default: null,
     },
     height: {
       type: Number,
-      min: [0, 'Height cannot be negative'],
+      min: [0, "Height cannot be negative"],
     },
     weight: {
       type: Number,
-      min: [0, 'Weight cannot be negative'],
+      min: [0, "Weight cannot be negative"],
     },
     height_unit: {
       type: String,
-      enum: ['cm', 'feet'],
-      default: 'cm',
+      enum: ["cm", "feet"],
+      default: "cm",
     },
     weight_unit: {
       type: String,
-      enum: ['kg', 'lbs'],
-      default: 'kg',
+      enum: ["kg", "lbs"],
+      default: "kg",
     },
     step_goal: {
       type: Number,
       default: 10000,
-      min: [1, 'Step goal must be at least 1'],
+      min: [1, "Step goal must be at least 1"],
     },
     location_permission: {
       type: Boolean,
@@ -108,8 +107,8 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
+      createdAt: "created_at",
+      updatedAt: "updated_at",
     },
     versionKey: false,
     toJSON: {
@@ -125,8 +124,8 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-userSchema.pre('save', async function savePassword(next) {
-  if (!this.isModified('password')) {
+userSchema.pre("save", async function savePassword(next) {
+  if (!this.isModified("password")) {
     return next();
   }
 
@@ -134,10 +133,12 @@ userSchema.pre('save', async function savePassword(next) {
   next();
 });
 
-userSchema.methods.comparePassword = function comparePassword(candidatePassword) {
+userSchema.methods.comparePassword = function comparePassword(
+  candidatePassword,
+) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;
