@@ -4,6 +4,8 @@ import {
   getAdminAlertDetail,
   getAdminAlerts,
   getAdminUsers,
+  getAdminStats,
+  getAdminUserGrowth,
   toggleAdminUserActive,
   updateAdminAlertStatus,
 } from '../controllers/admin.controller.js';
@@ -12,6 +14,8 @@ const router = express.Router();
 
 router.use(protect, restrictTo('admin'));
 
+router.get('/stats', getAdminStats);
+router.get('/user-growth', getAdminUserGrowth);
 router.get('/alerts', getAdminAlerts);
 router.get('/alerts/:id', getAdminAlertDetail);
 router.patch('/alerts/:id/status', updateAdminAlertStatus);

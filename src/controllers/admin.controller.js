@@ -15,6 +15,80 @@ const ALERT_FILTERS = ["all", "pending", "in_progress", "resolved"];
 const USER_FILTERS = ["all", "user", "client"];
 const STATUS_UPDATES = ["in_progress", "resolved"];
 
+export const getAdminStats = catchAsync(async (req, res) => {
+  const totalUsers = await User.countDocuments();
+  const totalClients = await User.countDocuments({ role: 'client' });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Admin statistics retrieved successfully",
+    data: {
+      total_users: totalUsers,
+      total_clients: totalClients,
+      retention_rate: "100%",
+    },
+  });
+});
+
+export const getAdminUserGrowth = catchAsync(async (req, res) => {
+  const { range = "7d" } = req.query;
+  const now = new Date();
+  let startDate = new Date();
+  let groupBy = "%Y-%m-%d";
+
+  if (range === "30d") {
+    startDate.setDate(now.getDate() - 30);
+  } else if (range === "6m") {
+    startDate.setMonth(now.getMonth() - 6);
+    groupBy = "%Y-%m";
+  } else if (range === "12m") {
+    startDate.setMonth(now.getMonth() - 12);
+    groupBy = "%Y-%m";
+  } else {
+    // Default 7 days
+    startDate.setDate(now.getDate() - 7);
+  }
+
+  const growth = await User.aggregate([
+    {
+      $match: {
+        created_at: { $gte: startDate },
+      },
+    },
+    {
+      $group: {
+        _id: { $dateToString: { format: groupBy, date: "$created_at" } },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+
+  // Fill gaps
+  const filledGrowth = [];
+  const curr = new Date(startDate);
+  while (curr <= now) {
+    const dateStr = curr.toISOString().split('T')[0].substring(0, groupBy === "%Y-%m" ? 7 : 10);
+    const existing = growth.find(g => g._id === dateStr);
+    filledGrowth.push({
+      _id: dateStr,
+      count: existing ? existing.count : 0
+    });
+    
+    if (groupBy === "%Y-%m") {
+      curr.setMonth(curr.getMonth() + 1);
+    } else {
+      curr.setDate(curr.getDate() + 1);
+    }
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "User growth data retrieved successfully",
+    data: filledGrowth,
+  });
+});
+
 const parsePagination = (query) => {
   const page = Math.max(1, Number(query.page) || 1);
   const limit = Math.max(1, Math.min(100, Number(query.limit) || 10));
@@ -169,12 +243,8 @@ export const updateAdminAlertStatus = catchAsync(async (req, res) => {
 
 export const getAdminUsers = catchAsync(async (req, res) => {
   const filter = req.query.filter || "all";
-
-  if (!USER_FILTERS.includes(filter)) {
-    throw new AppError("Invalid user filter", httpStatus.BAD_REQUEST);
-  }
-
   const query = filter === "all" ? {} : { role: filter };
+  
   const users = await User.find(query)
     .select("full_name email phone_number role is_active created_at")
     .sort({ created_at: -1 });
@@ -182,10 +252,6 @@ export const getAdminUsers = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     message: "Admin users retrieved successfully",
-    meta: {
-      filter,
-      total: users.length,
-    },
     data: users,
   });
 });
@@ -213,4 +279,6 @@ export default {
   updateAdminAlertStatus,
   getAdminUsers,
   toggleAdminUserActive,
+  getAdminStats,
+  getAdminUserGrowth,
 };

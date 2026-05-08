@@ -29,7 +29,23 @@ const setRefreshToken = async (user, res) => {
 };
 
 export const register = catchAsync(async (req, res) => {
-  const { full_name, phone_number, email, password, confirm_password } = req.body;
+  const {
+    full_name,
+    phone_number,
+    email,
+    password,
+    confirm_password,
+    role,
+    user_role,
+    type,
+    date_of_birth,
+    height,
+    weight,
+    step_goal,
+    height_unit,
+    weight_unit,
+    location_permission
+  } = req.body;
 
   if (!full_name || !phone_number || !email || !password || !confirm_password) {
     throw new AppError('All registration fields are required', httpStatus.BAD_REQUEST);
@@ -45,11 +61,22 @@ export const register = catchAsync(async (req, res) => {
     throw new AppError('Email already exists', httpStatus.CONFLICT);
   }
 
+  // Determine role (check multiple possible keys sent by admin panel)
+  const finalRole = role || user_role || type || 'user';
+
   const user = await User.create({
     full_name,
     phone_number,
     email,
     password,
+    role: finalRole,
+    date_of_birth,
+    height,
+    weight,
+    step_goal,
+    height_unit,
+    weight_unit,
+    location_permission
   });
 
   sendResponse(res, {
