@@ -273,6 +273,20 @@ export const toggleAdminUserActive = catchAsync(async (req, res) => {
   });
 });
 
+export const deleteAdminUser = catchAsync(async (req, res) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+
+  if (!user) {
+    throw new AppError("User not found", httpStatus.NOT_FOUND);
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "User deleted successfully from MongoDB",
+    data: null,
+  });
+});
+
 export default {
   getAdminAlerts,
   getAdminAlertDetail,
@@ -281,4 +295,5 @@ export default {
   toggleAdminUserActive,
   getAdminStats,
   getAdminUserGrowth,
+  deleteAdminUser,
 };
