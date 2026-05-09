@@ -12,6 +12,7 @@ import {
   getRefreshCookieOptions,
   verifyRefreshToken,
 } from '../utils/token.js';
+import { generateClientId } from '../utils/admin.js';
 
 const buildAuthPayload = (user) => ({
   user,
@@ -64,12 +65,18 @@ export const register = catchAsync(async (req, res) => {
   // Determine role (check multiple possible keys sent by admin panel)
   const finalRole = role || user_role || type || 'user';
 
+  let client_id = undefined;
+  if (finalRole === 'client') {
+    client_id = await generateClientId();
+  }
+
   const user = await User.create({
     full_name,
     phone_number,
     email,
     password,
     role: finalRole,
+    client_id,
     date_of_birth,
     height,
     weight,

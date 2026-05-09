@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 import User from '../models/User.js';
 
-const padSequence = (value) => String(value).padStart(2, '0');
+const padSequence = (value, length = 2) => String(value).padStart(length, '0');
 
 export const formatClientDateSegment = (value) => {
   const date = new Date(value);
@@ -12,13 +12,12 @@ export const formatClientDateSegment = (value) => {
   return `${year}${month}${day}`;
 };
 
-export const generateClientId = async (dateOfBirth, excludeUserId = null) => {
-  const dateSegment = formatClientDateSegment(dateOfBirth);
-  const prefix = `Client-${dateSegment}-`;
+export const generateClientId = async (excludeUserId = null) => {
+  const prefix = `Client - `;
 
   const query = {
     client_id: {
-      $regex: `^${prefix}`,
+      $regex: `^Client - \\d+$`,
     },
   };
 
@@ -37,7 +36,7 @@ export const generateClientId = async (dateOfBirth, excludeUserId = null) => {
     return Math.max(maxSequence, serial);
   }, 0);
 
-  return `${prefix}${padSequence(highestSequence + 1)}`;
+  return `${prefix}${padSequence(highestSequence + 1, 5)}`;
 };
 
 export const getFormattedClientId = async (user) => user?.client_id || null;

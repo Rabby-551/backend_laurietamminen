@@ -88,14 +88,8 @@ export const updateProfile = catchAsync(async (req, res) => {
       throw new AppError('Date of birth must be a valid date', httpStatus.BAD_REQUEST);
     }
 
-    const currentDateOfBirth = req.user.date_of_birth
-      ? new Date(req.user.date_of_birth)
-      : null;
-    const hasDateOfBirthChanged =
-      !currentDateOfBirth || currentDateOfBirth.getTime() !== parsedDateOfBirth.getTime();
-
-    if (!req.user.client_id || hasDateOfBirthChanged) {
-      allowedFields.client_id = await generateClientId(parsedDateOfBirth, req.user._id);
+    if (!req.user.client_id && req.user.role === 'client') {
+      allowedFields.client_id = await generateClientId(req.user._id);
     }
   }
 
