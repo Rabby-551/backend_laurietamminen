@@ -6,6 +6,7 @@ import {
   getAdminUsers,
   getAdminStats,
   getAdminUserGrowth,
+  getAdminUserDetail,
   toggleAdminUserActive,
   updateAdminAlertStatus,
   deleteAdminUser,
@@ -21,6 +22,7 @@ router.get('/alerts', getAdminAlerts);
 router.get('/alerts/:id', getAdminAlertDetail);
 router.patch('/alerts/:id/status', updateAdminAlertStatus);
 router.get('/users', getAdminUsers);
+router.get('/users/:id', getAdminUserDetail);
 router.patch('/users/:id/toggle-active', toggleAdminUserActive);
 router.delete('/users/:id', deleteAdminUser);
 

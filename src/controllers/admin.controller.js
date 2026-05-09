@@ -273,6 +273,20 @@ export const toggleAdminUserActive = catchAsync(async (req, res) => {
   });
 });
 
+export const getAdminUserDetail = catchAsync(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    throw new AppError("User not found", httpStatus.NOT_FOUND);
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Admin user detail retrieved successfully",
+    data: user,
+  });
+});
+
 export const deleteAdminUser = catchAsync(async (req, res) => {
   const user = await User.findByIdAndDelete(req.params.id);
 
@@ -295,5 +309,6 @@ export default {
   toggleAdminUserActive,
   getAdminStats,
   getAdminUserGrowth,
+  getAdminUserDetail,
   deleteAdminUser,
 };
