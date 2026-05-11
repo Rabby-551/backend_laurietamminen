@@ -50,9 +50,6 @@ export const register = catchAsync(async (req, res) => {
     client_id: custom_client_id,
   } = req.body;
 
-  console.log('Registration request body:', req.body);
-  console.log('Extracted custom_client_id:', custom_client_id);
-
   if (!full_name || !phone_number || !email || !password || !confirm_password) {
     throw new AppError('All registration fields are required', httpStatus.BAD_REQUEST);
   }
