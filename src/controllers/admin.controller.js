@@ -246,7 +246,7 @@ export const getAdminUsers = catchAsync(async (req, res) => {
   const query = filter === "all" ? {} : { role: filter };
   
   const users = await User.find(query)
-    .select("full_name email phone_number role is_active created_at")
+    .select("full_name email phone_number role client_id home_address is_active created_at")
     .sort({ created_at: -1 });
 
   sendResponse(res, {

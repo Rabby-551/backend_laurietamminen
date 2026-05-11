@@ -45,8 +45,13 @@ export const register = catchAsync(async (req, res) => {
     step_goal,
     height_unit,
     weight_unit,
-    location_permission
+    location_permission,
+    home_address,
+    client_id: custom_client_id,
   } = req.body;
+
+  console.log('Registration request body:', req.body);
+  console.log('Extracted custom_client_id:', custom_client_id);
 
   if (!full_name || !phone_number || !email || !password || !confirm_password) {
     throw new AppError('All registration fields are required', httpStatus.BAD_REQUEST);
@@ -65,8 +70,8 @@ export const register = catchAsync(async (req, res) => {
   // Determine role (check multiple possible keys sent by admin panel)
   const finalRole = role || user_role || type || 'user';
 
-  let client_id = undefined;
-  if (finalRole === 'client') {
+  let client_id = custom_client_id;
+  if (!client_id && finalRole === 'client') {
     client_id = await generateClientId();
   }
 
@@ -77,6 +82,7 @@ export const register = catchAsync(async (req, res) => {
     password,
     role: finalRole,
     client_id,
+    home_address,
     date_of_birth,
     height,
     weight,

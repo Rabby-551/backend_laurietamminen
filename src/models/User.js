@@ -80,6 +80,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    home_address: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     is_active: {
       type: Boolean,
       default: true,
