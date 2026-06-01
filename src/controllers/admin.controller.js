@@ -4,6 +4,8 @@ import User from "../models/User.js";
 import AppError from "../errors/AppError.js";
 import catchAsync from "../utils/catchAsync.js";
 import sendResponse from "../utils/sendResponse.js";
+import pick from "../utils/pick.js";
+import bcrypt from "bcryptjs";
 import {
   encryptConnectionState,
   formatActiveDuration,
@@ -91,7 +93,7 @@ export const getAdminUserGrowth = catchAsync(async (req, res) => {
 
 const parsePagination = (query) => {
   const page = Math.max(1, Number(query.page) || 1);
-  const limit = Math.max(1, Math.min(100, Number(query.limit) || 10));
+  const limit = Math.max(1, Math.min(10000, Number(query.limit) || 10));
   const skip = (page - 1) * limit;
 
   return { page, limit, skip };
@@ -301,6 +303,59 @@ export const deleteAdminUser = catchAsync(async (req, res) => {
   });
 });
 
+export const updateAdminUser = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new AppError("User not found", httpStatus.NOT_FOUND);
+  }
+
+  const allowedFields = pick(req.body, [
+    'full_name',
+    'email',
+    'phone_number',
+    'date_of_birth',
+    'home_address',
+    'client_id',
+    'is_active',
+  ]);
+
+  if (allowedFields.email) {
+    allowedFields.email = allowedFields.email.toLowerCase();
+    const emailOwner = await User.findOne({ email: allowedFields.email });
+
+    if (emailOwner && emailOwner._id.toString() !== id) {
+      throw new AppError('Email already exists', httpStatus.CONFLICT);
+    }
+  }
+
+  if (allowedFields.date_of_birth) {
+    const parsedDateOfBirth = new Date(allowedFields.date_of_birth);
+    if (Number.isNaN(parsedDateOfBirth.getTime())) {
+      throw new AppError('Date of birth must be a valid date', httpStatus.BAD_REQUEST);
+    }
+  }
+
+  if (req.body.password && req.body.password.trim() !== '') {
+    if (req.body.password.trim().length < 6) {
+      throw new AppError('Password must be at least 6 characters', httpStatus.BAD_REQUEST);
+    }
+    allowedFields.password = await bcrypt.hash(req.body.password.trim(), 12);
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(id, allowedFields, {
+    new: true,
+    runValidators: true,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: 'User updated successfully',
+    data: updatedUser,
+  });
+});
+
 export default {
   getAdminAlerts,
   getAdminAlertDetail,
@@ -311,4 +366,5 @@ export default {
   getAdminUserGrowth,
   getAdminUserDetail,
   deleteAdminUser,
+  updateAdminUser,
 };

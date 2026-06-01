@@ -10,6 +10,7 @@ import {
   toggleAdminUserActive,
   updateAdminAlertStatus,
   deleteAdminUser,
+  updateAdminUser,
 } from '../controllers/admin.controller.js';
 
 const router = express.Router();
@@ -23,6 +24,7 @@ router.get('/alerts/:id', getAdminAlertDetail);
 router.patch('/alerts/:id/status', updateAdminAlertStatus);
 router.get('/users', getAdminUsers);
 router.get('/users/:id', getAdminUserDetail);
+router.patch('/users/:id', updateAdminUser);
 router.patch('/users/:id/toggle-active', toggleAdminUserActive);
 router.delete('/users/:id', deleteAdminUser);
 
