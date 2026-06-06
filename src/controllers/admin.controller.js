@@ -331,10 +331,13 @@ export const updateAdminUser = catchAsync(async (req, res) => {
   }
 
   if (allowedFields.date_of_birth) {
-    const parsedDateOfBirth = new Date(allowedFields.date_of_birth);
+    // Normalize to UTC midnight to prevent timezone-related date shifts
+    const dobStr = String(allowedFields.date_of_birth).substring(0, 10);
+    const parsedDateOfBirth = new Date(dobStr + 'T00:00:00.000Z');
     if (Number.isNaN(parsedDateOfBirth.getTime())) {
       throw new AppError('Date of birth must be a valid date', httpStatus.BAD_REQUEST);
     }
+    allowedFields.date_of_birth = parsedDateOfBirth;
   }
 
   if (req.body.password && req.body.password.trim() !== '') {

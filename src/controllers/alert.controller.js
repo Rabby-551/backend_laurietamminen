@@ -61,15 +61,57 @@ const serializeAlertPayload = (alert, user) => ({
   updated_at: alert.updated_at,
 });
 
-const compareDateOnly = (date1, date2) => {
-  const d1 = new Date(date1);
-  const d2 = new Date(date2);
+/**
+ * Compare two dates by their date-only portion (YYYY-MM-DD).
+ * Timezone-proof: extracts the "YYYY-MM-DD" string directly
+ * so it works identically from any timezone in the world.
+ */
+const extractDateOnly = (input) => {
+  if (!input) return null;
+  const str = String(input instanceof Date ? input.toISOString() : input);
+  // If already "YYYY-MM-DD" (10 chars), use directly
+  const dateOnly = str.substring(0, 10);
+  // Validate format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) return dateOnly;
+  return null;
+};
 
-  return (
-    d1.getUTCFullYear() === d2.getUTCFullYear() &&
-    d1.getUTCMonth() === d2.getUTCMonth() &&
-    d1.getUTCDate() === d2.getUTCDate()
-  );
+const compareDateOnly = (storedDate, inputDate) => {
+  // For the stored date (from MongoDB), we need to handle potential timezone shifts.
+  // Re-parse it as UTC midnight to get the intended calendar date.
+  const getStoredDateString = (d) => {
+    if (!d) return null;
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return null;
+    // Use UTC components to build YYYY-MM-DD
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  // For the input date (from client request), extract the YYYY-MM-DD directly
+  // from the string to avoid any Date parsing timezone shifts.
+  const getInputDateString = (d) => {
+    if (!d) return null;
+    const str = String(d);
+    // Extract YYYY-MM-DD from the beginning of the string
+    const match = str.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+    // Fallback: parse as Date and use UTC components
+    const date = new Date(str);
+    if (isNaN(date.getTime())) return null;
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  const d1 = getStoredDateString(storedDate);
+  const d2 = getInputDateString(inputDate);
+
+  if (!d1 || !d2) return false;
+  return d1 === d2;
 };
 
 export const triggerAlert = catchAsync(async (req, res) => {
@@ -95,6 +137,14 @@ export const triggerAlert = catchAsync(async (req, res) => {
   if (!date_of_birth) {
     throw new AppError("Date of birth is required", httpStatus.BAD_REQUEST);
   }
+
+  // Debug: log the exact values being compared for DOB verification
+  console.log("[DOB Comparison Debug]", {
+    storedDOB: req.user.date_of_birth,
+    storedDOB_ISO: req.user.date_of_birth instanceof Date ? req.user.date_of_birth.toISOString() : String(req.user.date_of_birth),
+    inputDOB: date_of_birth,
+    inputDOB_type: typeof date_of_birth,
+  });
 
   if (!compareDateOnly(req.user.date_of_birth, date_of_birth)) {
     throw new AppError("Date of birth does not match", httpStatus.BAD_REQUEST);

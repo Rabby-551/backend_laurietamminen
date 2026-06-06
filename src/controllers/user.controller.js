@@ -82,11 +82,15 @@ export const updateProfile = catchAsync(async (req, res) => {
   }
 
   if (allowedFields.date_of_birth) {
-    const parsedDateOfBirth = new Date(allowedFields.date_of_birth);
+    // Normalize to UTC midnight to prevent timezone-related date shifts
+    const dobStr = String(allowedFields.date_of_birth).substring(0, 10);
+    const parsedDateOfBirth = new Date(dobStr + 'T00:00:00.000Z');
 
     if (Number.isNaN(parsedDateOfBirth.getTime())) {
       throw new AppError('Date of birth must be a valid date', httpStatus.BAD_REQUEST);
     }
+
+    allowedFields.date_of_birth = parsedDateOfBirth;
 
     if (!req.user.client_id && req.user.role === 'client') {
       allowedFields.client_id = await generateClientId(req.user._id);

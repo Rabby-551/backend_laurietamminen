@@ -72,6 +72,16 @@ export const register = catchAsync(async (req, res) => {
     client_id = await generateClientId();
   }
 
+  // Normalize date_of_birth to UTC midnight to prevent timezone-related date shifts
+  let normalizedDob = date_of_birth || undefined;
+  if (normalizedDob) {
+    const dobStr = String(normalizedDob).substring(0, 10);
+    const parsedDob = new Date(dobStr + 'T00:00:00.000Z');
+    if (!isNaN(parsedDob.getTime())) {
+      normalizedDob = parsedDob;
+    }
+  }
+
   const user = await User.create({
     full_name,
     phone_number,
@@ -80,7 +90,7 @@ export const register = catchAsync(async (req, res) => {
     role: finalRole,
     client_id,
     home_address,
-    date_of_birth,
+    date_of_birth: normalizedDob,
     height,
     weight,
     step_goal,
