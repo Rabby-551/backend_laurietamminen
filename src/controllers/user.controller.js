@@ -179,9 +179,31 @@ export const changePassword = catchAsync(async (req, res) => {
   });
 });
 
+export const deleteAccount = catchAsync(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new AppError('User not found', httpStatus.NOT_FOUND);
+  }
+
+  if (user.profile_picture_public_id) {
+    await cloudinary.uploader.destroy(user.profile_picture_public_id).catch(() => null);
+  }
+
+  await User.findByIdAndDelete(req.user._id);
+
+  res.clearCookie('refreshToken', getRefreshCookieClearOptions());
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: 'Account deleted successfully',
+  });
+});
+
 export default {
   getProfile,
   updateProfile,
   updateStepGoal,
   changePassword,
+  deleteAccount,
 };

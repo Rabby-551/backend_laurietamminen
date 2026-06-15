@@ -6,6 +6,7 @@ import {
   getProfile,
   updateProfile,
   updateStepGoal,
+  deleteAccount,
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -14,6 +15,7 @@ router.use(protect);
 
 router.get('/profile', getProfile);
 router.patch('/profile', upload.single('profile_picture'), updateProfile);
+router.delete('/profile', deleteAccount);
 router.patch('/step-goal', updateStepGoal);
 router.patch('/change-password', changePassword);
 
