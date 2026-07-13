@@ -31,7 +31,7 @@ export const createAccessToken = (payload) =>
 
 export const createRefreshToken = (payload) =>
   jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '365d',
   });
 
 export const verifyAccessToken = (token) => jwt.verify(token, process.env.JWT_SECRET);
@@ -46,7 +46,10 @@ const buildBaseRefreshCookieOptions = () => ({
 
 export const getRefreshCookieOptions = () => ({
   ...buildBaseRefreshCookieOptions(),
-  maxAge: parseExpiryToMilliseconds(process.env.JWT_REFRESH_EXPIRES_IN || '7d', 7 * 24 * 60 * 60 * 1000),
+  maxAge: parseExpiryToMilliseconds(
+    process.env.JWT_REFRESH_EXPIRES_IN || '365d',
+    365 * 24 * 60 * 60 * 1000,
+  ),
 });
 
 export const getRefreshCookieClearOptions = () => buildBaseRefreshCookieOptions();

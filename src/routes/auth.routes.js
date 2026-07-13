@@ -1,5 +1,4 @@
 import express from 'express';
-import protect from '../middleware/auth.js';
 import {
   forgotPassword,
   login,
@@ -18,6 +17,6 @@ router.post('/forgot-password', forgotPassword);
 router.post('/verify-otp', verifyOtp);
 router.post('/reset-password', resetPassword);
 router.post('/refresh-token', refreshToken);
-router.post('/logout', protect, logout);
+router.post('/logout', logout);
 
 export default router;

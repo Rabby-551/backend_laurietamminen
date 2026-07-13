@@ -266,18 +266,25 @@ export const refreshToken = catchAsync(async (req, res) => {
   }
 
   const accessToken = createAccessToken({ id: user._id, role: user.role });
+  const newRefreshToken = await setRefreshToken(user, res);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     message: 'Access token refreshed successfully',
     data: {
       access_token: accessToken,
+      refresh_token: newRefreshToken,
     },
   });
 });
 
 export const logout = catchAsync(async (req, res) => {
-  const user = await User.findById(req.user._id).select('+refresh_token');
+  const providedToken = req.cookies?.refreshToken || req.body?.refresh_token;
+  const user = providedToken
+    ? await User.findOne({ refresh_token: providedToken }).select(
+        '+refresh_token',
+      )
+    : null;
 
   if (user) {
     user.refresh_token = null;
